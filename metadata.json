@@ -1,0 +1,6 @@
+{
+  "name": "VidPost - Video & Telegram Automation Hub",
+  "description": "A production-ready SaaS platform integrating public video streaming with automated Telegram channel dispatch loops.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

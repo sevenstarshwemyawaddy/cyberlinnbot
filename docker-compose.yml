@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # Main Full-Stack Application Gateway (Vite + Express API Proxy)
+  api:
+    image: node:18-alpine
+    container_name: automation_api_service
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - APP_URL=http://localhost:3000
+    volumes:
+      - .:/app
+    command: npm run start
+    restart: always
+
+  # Local Media File Syncer & Metadata Extractor Daemon Agent
+  local_agent:
+    image: node:18-alpine
+    container_name: local_scanner_agent
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /videos:/videos
+      - /media:/media
+      - /mnt/external/videos:/mnt/external/videos
+    environment:
+      - NODE_ENV=production
+      - API_ENDPOINT=http://api:3000
+      - API_KEY=vpstg_agent_secret_2026
+    command: node agent.js
+    restart: always
+
+  # n8n Automation Engine Workflow Router
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: n8n_automation_engine
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=SuperSecureN8NPassword2026
+    volumes:
+      - n8n_data:/home/node/.n8n
+    restart: always
+
+  # Dedicated Local PostgreSQL Database Cache / Supabase Emulator
+  postgres:
+    image: postgres:15-alpine
+    container_name: app_database_cache
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=DatabaseMasterPassword2026
+      - POSTGRES_DB=media_automation
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: always
+
+  # Redis InMemory Queue Broker for Worker tasks & Auto-Posting Jobs
+  redis:
+    image: redis:7-alpine
+    container_name: broker_queue_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
+volumes:
+  n8n_data:
+  pg_data:
+  redis_data:
